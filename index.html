@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zintlr Deal Copilot · Personality Action Engine</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --accent-purple: #4f46e5;
+      --accent-purple-light: #eef2ff;
+      --accent-blue: #2563eb;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --pill-blue-bg: #e0f2fe;
+      --pill-blue-text: #0369a1;
+      --pill-yellow-bg: #fef3c7;
+      --pill-yellow-text: #b45309;
+      --green: #059669;
+      --red: #dc2626;
+      --yellow: #d97706;
+      --shadow-card: 0 10px 25px -5px rgba(99, 102, 241, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Nav */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-toggle {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn.active {
+      background: #ffffff;
+      color: var(--accent-purple);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .toggle-btn.legacy-active {
+      background: #475569;
+      color: white;
+    }
+
+    /* Self-Scan Trust Banner */
+    .trust-banner-top {
+      background: linear-gradient(90deg, #eef2ff, #f0fdf4);
+      border-bottom: 1px solid #c7d2fe;
+      padding: 10px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .trust-banner-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .trust-btn-cta {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .trust-btn-cta:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    /* Main Grid */
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 280px 440px 1fr;
+      gap: 24px;
+      flex: 1;
+      align-items: start;
+    }
+
+    /* COLUMN 1: Prospect Switcher */
+    .col-prospects {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .col-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .prospect-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .prospect-item:hover {
+      border-color: #cbd5e1;
+      background: #ffffff;
+    }
+
+    .prospect-item.active {
+      background: #ffffff;
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .prospect-img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .prospect-meta h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .prospect-meta p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* COLUMN 2: Zintlr Personality Intel Card */
+    .zintlr-intel-card {
+      background: #ffffff;
+      border: 2px solid #e0e7ff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-photo-frame {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #e0e7ff;
+      flex-shrink: 0;
+    }
+
+    .user-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-titles h3 {
+      font-size: 19px;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-titles p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .menu-dots {
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* Tags Group */
+    .tags-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .intel-tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .intel-tag.blue {
+      background: var(--pill-blue-bg);
+      color: var(--pill-blue-text);
+    }
+
+    .intel-tag.yellow {
+      background: var(--pill-yellow-bg);
+      color: var(--pill-yellow-text);
+    }
+
+    .divider-line {
+      height: 1px;
+      background: #f1f5f9;
+      margin: 2px 0;
+    }
+
+    /* Comparison Section: "You vs Prospect" */
+    .compare-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .compare-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: #4f46e5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .calibrate-link {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4f46e5;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .calibrate-link:hover {
+      background: #e0e7ff;
+    }
+
+    .scale-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .scale-track {
+      display: flex;
+      gap: 6px;
+      position: relative;
+      height: 10px;
+      align-items: center;
+    }
+
+    .track-segment {
+      flex: 1;
+      height: 8px;
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .avatar-pin {
+      position: absolute;
+      top: -14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translateX(-50%);
+      z-index: 2;
+      transition: left 0.4s ease;
+    }
+
+    .avatar-pin img, .avatar-pin .rep-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .avatar-pin .rep-icon {
+      background: #6366f1;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-pin span {
+      font-size: 10px;
+      font-weight: 700;
+      color: #475569;
+      margin-top: 12px;
+      white-space: nowrap;
+    }
+
+    /* COLUMN 3: The Action Engine */
+    .col-action-engine {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Behavioral Delta Card */
+    .delta-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .delta-banner-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .delta-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e40af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .delta-desc {
+      font-size: 13px;
+      color: #1e3a8a;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* The 3-Second Battlecard */
+    .battlecard-container {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .battlecard-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .battlecard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .b-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .b-card.do { border-top: 3px solid var(--green); }
+    .b-card.dont { border-top: 3px solid var(--red); }
+    .b-card.hook { border-top: 3px solid var(--yellow); }
+
+    .b-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .b-label.do { color: var(--green); }
+    .b-label.dont { color: var(--red); }
+    .b-label.hook { color: var(--yellow); }
+
+    .b-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    /* 1-Click Outreach */
+    .outreach-box {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .outreach-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tab-pills {
+      display: flex;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 8px;
+      gap: 3px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .email-preview {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .email-subject {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e40af;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .email-body {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+      white-space: pre-wrap;
+    }
+
+    .copy-btn {
+      background: var(--accent-purple);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    /* Trust Twist Panel */
+    .trust-panel {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .trust-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .evidence-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chip {
+      background: #f8fafc;
+      border-left: 3px solid var(--accent-purple);
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #334155;
+      border-radius: 4px;
+    }
+
+    /* Self-Scan Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 580px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .self-slider-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 90px;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .self-slider-row input[type=range] {
+      accent-color: #4f46e5;
+      cursor: pointer;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1100;
+    }
+
+    .toast.show {
+      display: flex;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand">
+      <div class="logo-badge">ZINTLR</div>
+      <div>
+        <div class="brand-title">Personality Action Engine · Deal Copilot</div>
+        <div class="brand-subtitle">Bridging the gap between "You vs Prospect" psychology and 3-second sales execution</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="mode-toggle">
+        <button id="btn-legacy" class="toggle-btn" onclick="setMode('legacy')">⚠️ Legacy (Info Only)</button>
+        <button id="btn-action" class="toggle-btn active" onclick="setMode('action')">⚡ Action Engine (With Fixes)</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- The Self-Monitoring Trust Banner ("The Sales Mirror") -->
+  <section class="trust-banner-top">
+    <div class="trust-banner-info">
+      <span style="font-size: 20px;">🪞</span>
+      <div>
+        <span style="font-size: 13px; font-weight: 700; color: #3730a3;">The Self-Monitoring Trust Loop:</span>
+        <span style="font-size: 12px; color: #4338ca; margin-left: 6px;">Skeptical about AI accuracy? Scan your own LinkedIn profile to see how accurately Zintlr identifies your selling style.</span>
+      </div>
+    </div>
+    <button class="trust-btn-cta" onclick="openSelfScanModal()">
+      <span>✨ Test On Yourself</span>
+    </button>
+  </section>
+
+  <!-- Main 3-Column Layout -->
+  <div class="container">
+
+    <!-- Column 1: Switcher -->
+    <aside class="col-prospects">
+      <div class="col-title">Select Prospect</div>
+      <div id="prospectList" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Rendered by JS -->
+      </div>
+      <div style="font-size:11px; color:#64748b; line-height:1.4; margin-top:auto; border-top:1px solid #f1f5f9; padding-top:12px;">
+        💡 <strong>Founder Test:</strong> Switch prospects to see how the "You vs Buyer" friction automatically recalculates your sales talk-track.
+      </div>
+    </aside>
+
+    <!-- Column 2: Zintlr Native Intel Card -->
+    <section class="zintlr-intel-card" id="zintlrCard">
+      <div class="card-top">
+        <div class="user-profile">
+          <div class="user-photo-frame">
+            <img id="pImg" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80" alt="Avatar">
+          </div>
+          <div class="user-titles">
+            <h3 id="pName">🔒 Jacob Jones</h3>
+            <p><span id="pTitle">💼 Chief Engineer</span></p>
+          </div>
+        </div>
+        <div class="menu-dots">⋮</div>
+      </div>
+
+      <!-- Personality Pills -->
+      <div class="tags-group" id="pTags">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="divider-line"></div>
+
+      <!-- You vs Prospect Sliders (Exact Match to Zintlr Screenshot) -->
+      <div class="compare-section">
+        <div class="compare-header">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span>⭐</span>
+            <span id="compareTitle">You vs Jacob</span>
+          </div>
+          <button class="calibrate-link" onclick="openSelfScanModal()">
+            🪞 Calibrate "You"
+          </button>
+        </div>
+
+        <!-- Scale 1: Talkative vs Reserved -->
+        <div class="scale-row">
+          <div class="scale-labels">
+            <span>Talkative</span>
+            <span>Reserved</span>
+          </div>
+          <div class="scale-track" id="track1">
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+          </div>
+        </div>
+
+        <!-- Scale 2: Decisive vs Deliberate -->
+        <div class="scale-row" style="margin-top:14px;">
+          <div class="scale-labels">
+            <span>Decisive</span>
+            <span>Deliberate</span>
+          </div>
+          <div class="scale-track" id="track2">
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+          </div>
+        </div>
+
+        <!-- Scale 3: Risk-tolerant vs Risk-avoidant -->
+        <div class="scale-row" style="margin-top:14px;">
+          <div class="scale-labels">
+            <span>Risk-tolerant</span>
+            <span>Risk-avoidant</span>
+          </div>
+          <div class="scale-track" id="track3">
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+          </div>
+        </div>
+
+        <!-- Scale 4: Supporting vs Dominant -->
+        <div class="scale-row" style="margin-top:14px;">
+          <div class="scale-labels">
+            <span>Supporting</span>
+            <span>Dominant</span>
+          </div>
+          <div class="scale-track" id="track4">
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+            <div class="track-segment"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="font-size:11px; color:#94a3b8; text-align:center; padding-top:6px; border-top:1px solid #f8fafc;">
+        Zintlr Proprietary Psychographic Intelligence
+      </div>
+    </section>
+
+    <!-- Column 3: The Action Engine (The Missing Link!) -->
+    <main class="col-action-engine">
+
+      <!-- If Legacy Mode Selected -->
+      <div id="legacyBox" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:20px; color:#991b1b;">
+        <h4 style="font-size:15px; font-weight:800; margin-bottom:6px;">⚠️ The Actionability Void (Current Problem)</h4>
+        <p style="font-size:13px; line-height:1.5;">
+          The rep sees the card on the left with 4 sliders and traits like <em>"Deliberate"</em> and <em>"Risk-avoidant"</em>. But there is <strong>no prescriptive execution</strong>. The rep asks: <em>"So what do I actually say on the call?"</em> Rep cognitive fatigue sets in, leading to the 78% drop-off cliff.
+        </p>
+      </div>
+
+      <!-- Active Action Engine -->
+      <div id="actionContainer" style="display:flex; flex-direction:column; gap:20px;">
+
+        <!-- 1. Behavioral Delta Card -->
+        <div class="delta-banner">
+          <div class="delta-banner-icon">⚡</div>
+          <div>
+            <div class="delta-title" id="deltaTitle">Behavioral Friction Diagnosis</div>
+            <div class="delta-desc" id="deltaDesc">
+              Jacob is significantly more <strong>Risk-avoidant</strong> and <strong>Dominant</strong> than you. If you pitch visionary ideas, he will push back. Lead strictly with compliance benchmarks and let him control the agenda.
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. The 3-Second Battlecard -->
+        <div class="battlecard-container">
+          <div class="battlecard-title">The 3-Second Pre-Call Battlecard</div>
+          <div class="battlecard-grid">
+            <div class="b-card do">
+              <div class="b-label do"><span>✓</span> What to Pitch (DO)</div>
+              <div class="b-text" id="bDo">Lead with architecture security, hard data, and SLA metrics.</div>
+            </div>
+            <div class="b-card dont">
+              <div class="b-label dont"><span>✕</span> What to Avoid (DON'T)</div>
+              <div class="b-text" id="bDont">Never do unstructured small talk on slide 1; don't push sudden discounts.</div>
+            </div>
+            <div class="b-card hook">
+              <div class="b-label hook"><span>🎯</span> Golden Pitch Hook</div>
+              <div class="b-text" id="bHook">Focus on automated rollback safeguards and reducing technical debt.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 1-Click Tailored Outreach -->
+        <div class="outreach-box">
+          <div class="outreach-top">
+            <div>
+              <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">1-Click Tailored Outreach</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Bridges the psychological gap directly into send-ready copy.</div>
+            </div>
+            <div class="tab-pills">
+              <button class="tab-btn active" id="tabCold" onclick="setOutreachTab('cold')">Cold Email</button>
+              <button class="tab-btn" id="tabOpener" onclick="setOutreachTab('opener')">Call Opener</button>
+            </div>
+          </div>
+
+          <div class="email-preview">
+            <div class="email-subject" id="outSubject">Subject: Query latency reduction without adding developer overhead</div>
+            <div class="email-body" id="outBody">Jacob — noticed your team's focus on system resilience and microservices.\n\nWe helped peer engineering leads reduce latency by 32% while maintaining strict SOC-2 compliance with zero downtime.\n\nHere is our architectural benchmark if useful. Worth a 7-minute look?</div>
+          </div>
+
+          <button class="copy-btn" onclick="copyToClipboard()">
+            <span>📋</span> Copy to Email
+          </button>
+        </div>
+
+        <!-- 4. The Trust Engine ("The Twist" Scenario) -->
+        <div class="trust-panel">
+          <div class="trust-header">
+            <span>🛡️ Why Should You Trust This? (<span id="trustConf">93%</span> Confidence)</span>
+            <span style="font-size:11px; color:#4f46e5; cursor:pointer;" onclick="logAccuracy()">Feedback: 👍 Mark Verified</span>
+          </div>
+          <div class="evidence-chips" id="trustChips">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Interactive Self-Scan Modal ("The Sales Mirror") -->
+  <div id="selfScanModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 17px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+            <span>🪞</span> The LinkedIn Sales Mirror · Self-Monitoring
+          </h3>
+          <p style="font-size: 12px; color: #64748b; margin-top: 3px;">
+            Validate the AI on your own profile to establish trust and calibrate the "You vs Buyer" engine.
+          </p>
+        </div>
+        <button onclick="closeSelfScanModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">✕</button>
+      </div>
+
+      <!-- Live Scanner Input -->
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569;">1. Test With Your Own LinkedIn URL</div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="selfUrlInput" value="linkedin.com/in/aryan-chauhan-product" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none;">
+          <button onclick="runSelfScan()" style="background: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+            Run Scan ⚡
+          </button>
+        </div>
+        <div id="scanProgress" style="display: none; font-size: 11px; color: #4f46e5; font-weight: 700;">
+          ✓ Analyzed syntax, tone & post cadence. Profile calibrated!
+        </div>
+      </div>
+
+      <!-- Scanned Persona Result -->
+      <div style="background: #ffffff; border: 2px solid #e0e7ff; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 38px; height: 38px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">You</div>
+            <div>
+              <div style="font-weight: 800; font-size: 14px; color: #1e293b;" id="selfNameBadge">Aryan Chauhan (You)</div>
+              <div style="font-size: 11px; color: #64748b;">Sales Archetype: <strong style="color: #4f46e5;" id="selfArchetype">The Strategic Catalyst 🎯</strong></div>
+            </div>
+          </div>
+          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">
+            ✓ Self-Verified
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: #334155; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;" id="selfBio">
+          • <strong>Superpower:</strong> Persuasive consensus-builder; anchors high-ticket deals on clear strategic ROI.<br>
+          • <strong>Blindspot:</strong> Leans naturally accommodating; may avoid pushing back when dominant buyers challenge scope.
+        </div>
+
+        <!-- Calibrate Your Own 4 Sliders -->
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569;">2. Fine-Tune Your 4 Personality Scales</div>
+          
+          <div class="self-slider-row">
+            <span>Talkative</span>
+            <input type="range" min="1" max="5" step="0.5" id="selfSlider1" value="3.5">
+            <span style="text-align:right;">Reserved</span>
+          </div>
+          <div class="self-slider-row">
+            <span>Decisive</span>
+            <input type="range" min="1" max="5" step="0.5" id="selfSlider2" value="2.5">
+            <span style="text-align:right;">Deliberate</span>
+          </div>
+          <div class="self-slider-row">
+            <span>Risk-tolerant</span>
+            <input type="range" min="1" max="5" step="0.5" id="selfSlider3" value="4.0">
+            <span style="text-align:right;">Risk-avoidant</span>
+          </div>
+          <div class="self-slider-row">
+            <span>Supporting</span>
+            <input type="range" min="1" max="5" step="0.5" id="selfSlider4" value="4.0">
+            <span style="text-align:right;">Dominant</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button onclick="closeSelfScanModal()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="applySelfCalibration()" style="background: #4f46e5; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);">Apply & Calibrate Live Copilot ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span style="color:#10b981; font-size:16px;">✓</span> Copied to clipboard! Ready to send in 3 seconds.
+  </div>
+
+  <script>
+    // Rep's own calibrated profile
+    let repProfile = {
+      name: "You",
+      scales: [3.5, 2.5, 4.0, 4.0] // Talkative(1)-Reserved(5), Decisive(1)-Deliberate(5), Risk-tolerant(1)-Risk-avoidant(5), Supporting(1)-Dominant(5)
+    };
+
+    const prospects = [
+      {
+        id: "p1",
+        name: "🔒 Jacob Jones",
+        title: "💼 Chief Engineer",
+        img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
+        pills: [
+          { text: "Deliberate 🤔", type: "blue" },
+          { text: "Quality-conscious 👌", type: "blue" },
+          { text: "Opinionated 💬🗣️", type: "blue" },
+          { text: "Proficient Negotiator 🤝💼", type: "yellow" }
+        ],
+        scales: [2.0, 2.0, 4.5, 4.5], // Talkative-Reserved, Decisive-Deliberate, Risk-tolerant-Risk-avoidant, Supporting-Dominant
+        deltaTitle: "Behavioral Friction: Jacob is Dominant & Risk-Avoidant",
+        deltaDesc: "Jacob expects precision and control. Since you naturally lean Supporting and Talkative, resist the urge to fill conversational pauses with casual pleasantries. Let him steer, validate his architectural standards, and lead with risk mitigation.",
+        do: "Lead with architecture security, hard SLA uptime data, and rollback safeguards.",
+        dont: "Never use vague hype words like 'magical'; avoid unstructured small talk on slide 1.",
+        hook: "Focus on latency reduction and zero-downtime microservices compliance.",
+        coldSub: "Subject: Microservices latency reduction without developer overhead",
+        coldBody: "Jacob — noticed your team's focus on microservice resilience at scale.\n\nWe helped peer engineering organizations reduce distributed latency by 32% while maintaining strict SOC-2 compliance with zero downtime.\n\nHere is our architectural benchmark if useful: [link]. Worth a 7-minute look?",
+        openSub: "Live Call Opener (First 30 Seconds)",
+        openBody: "“Jacob, thanks for jumping on. Straight to the point: I reviewed your system footprint, and today’s sole goal is to share our benchmark data on query latency without adding developer overhead. I have three specific technical slides ready—where would you like to start?”",
+        confidence: "93%",
+        evidence: [
+          "Analyzed 16 public engineering blog posts: highly factual, declarative sentence syntax.",
+          "Public conference keynote: Emphasized zero-downtime migration over new feature rollout.",
+          "Verifiable Signal: Rejects meetings that do not provide pre-circulated technical specifications."
+        ]
+      },
+      {
+        id: "p2",
+        name: "🔒 Sarah Jenkins",
+        title: "💼 VP of Product",
+        img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80",
+        pills: [
+          { text: "Analytical 📊", type: "blue" },
+          { text: "Detail-oriented 🔍", type: "blue" },
+          { text: "Systematic ⚙️", type: "blue" },
+          { text: "Value-Driven 🎯", type: "yellow" }
+        ],
+        scales: [4.0, 4.5, 4.0, 2.0],
+        deltaTitle: "Behavioral Friction: Sarah is Analytical & Reserved",
+        deltaDesc: "Sarah evaluates decisions via ROI formulas. You lean Talkative, so shorten your pitch by 50%. Focus entirely on customer retention cohorts and onboarding velocity.",
+        do: "Provide side-by-side product teardown metrics and customer retention cohort lifts.",
+        dont: "Do not rush into pricing or push for a contract signature on call one.",
+        hook: "Demonstrate 24% increase in user retention through automated UX workflows.",
+        coldSub: "Subject: Benchmarking 30-day user retention cohorts",
+        coldBody: "Sarah — noticed your team’s recent product release.\n\nWe analyzed retention curves across 200+ SaaS apps and mapped how in-workflow guidance lifted 30-day repeat usage from 12% to 35%.\n\nHappy to share the retention teardown if relevant for your team.",
+        openSub: "Live Call Opener (First 30 Seconds)",
+        openBody: "“Sarah, appreciate your time. We have a clear 15-minute agenda focusing on retention telemetry. I'll share the cohort curves directly so you can evaluate the model yourself.”",
+        confidence: "91%",
+        evidence: [
+          "Authored 8 articles on product-led growth and telemetry instrumentation.",
+          "Regularly references A/B test statistical significance in public discussions.",
+          "Verifiable Signal: Requires verifiable case study data before advancing to demo."
+        ]
+      },
+      {
+        id: "p3",
+        name: "🔒 Marcus Vance",
+        title: "💼 Chief Commercial Officer",
+        img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
+        pills: [
+          { text: "Direct ⚡", type: "blue" },
+          { text: "Results-focused 🏆", type: "blue" },
+          { text: "Competitive 🎯", type: "blue" },
+          { text: "Hard Bargainer 💼", type: "yellow" }
+        ],
+        scales: [1.5, 1.2, 1.5, 4.8],
+        deltaTitle: "Behavioral Friction: Marcus is Hyper-Dominant & Decisive",
+        deltaDesc: "Marcus is an aggressive driver who hates small talk. Send a 3-bullet agenda 24 hours before the call. Anchor everything on route net margins and market share gains.",
+        do: "Cut straight to bottom-line net revenue impact; share ROI within first 90 seconds.",
+        dont: "Do not spend the first 5 minutes on company history or feature lists.",
+        hook: "Highlight 14% higher route margins within 45 days against competitor fleets.",
+        coldSub: "Subject: +14% route margin expansion for Apex Logistics",
+        coldBody: "Marcus — straight to the point: our platform helped enterprise logistics operators unlock 14% higher route margins within 45 days.\n\nWorth a 7-minute look at how Apex compares against current industry benchmarks?",
+        openSub: "Live Call Opener (First 30 Seconds)",
+        openBody: "“Marcus, appreciate your time. I know you have a hard stop in 15 minutes. We have three agenda points focused solely on your commercial route margin expansion. Let's start with point one.”",
+        confidence: "89%",
+        evidence: [
+          "Consistently posts quarterly commercial quota accomplishments.",
+          "Uses imperative, brief syntax; rejects emails longer than 4 sentences.",
+          "Verifiable Signal: Cancels meetings that do not present ROI metrics upfront."
+        ]
+      }
+    ];
+
+    let currentIdx = 0;
+    let currentOutreachTab = "cold";
+
+    function renderProspectList() {
+      const container = document.getElementById("prospectList");
+      container.innerHTML = "";
+      prospects.forEach((p, idx) => {
+        const item = document.createElement("div");
+        item.className = `prospect-item ${idx === currentIdx ? 'active' : ''}`;
+        item.onclick = () => selectProspect(idx);
+        item.innerHTML = `
+          <img src="${p.img}" class="prospect-img" alt="Avatar">
+          <div class="prospect-meta">
+            <h4>${p.name.replace('🔒 ', '')}</h4>
+            <p>${p.title.replace('💼 ', '')}</p>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function selectProspect(idx) {
+      currentIdx = idx;
+      renderProspectList();
+      updateUI();
+    }
+
+    function updateUI() {
+      const p = prospects[currentIdx];
+
+      // Update Native Card
+      document.getElementById("pImg").src = p.img;
+      document.getElementById("pName").innerText = p.name;
+      document.getElementById("pTitle").innerText = p.title;
+      document.getElementById("compareTitle").innerText = `You vs ${p.name.replace('🔒 ', '').split(' ')[0]}`;
+
+      // Render Pills
+      const tagsEl = document.getElementById("pTags");
+      tagsEl.innerHTML = p.pills.map(tag => `<div class="intel-tag ${tag.type}">${tag.text}</div>`).join("");
+
+      // Render Sliders with Rep Profile
+      renderSlider("track1", p.scales[0], repProfile.scales[0], p.img, p.name.split(' ')[1]);
+      renderSlider("track2", p.scales[1], repProfile.scales[1], p.img, p.name.split(' ')[1]);
+      renderSlider("track3", p.scales[2], repProfile.scales[2], p.img, p.name.split(' ')[1]);
+      renderSlider("track4", p.scales[3], repProfile.scales[3], p.img, p.name.split(' ')[1]);
+
+      // Update Action Engine Column
+      document.getElementById("deltaTitle").innerText = p.deltaTitle;
+      document.getElementById("deltaDesc").innerText = p.deltaDesc;
+      document.getElementById("bDo").innerText = p.do;
+      document.getElementById("bDont").innerText = p.dont;
+      document.getElementById("bHook").innerText = p.hook;
+
+      updateOutreachCopy();
+
+      // Trust Panel
+      document.getElementById("trustConf").innerText = p.confidence;
+      const chipsEl = document.getElementById("trustChips");
+      chipsEl.innerHTML = p.evidence.map(e => `<div class="chip">${e}</div>`).join("");
+    }
+
+    function renderSlider(trackId, pScale, uScale, pImg, pShortName) {
+      const track = document.getElementById(trackId);
+      const existingPins = track.querySelectorAll(".avatar-pin");
+      existingPins.forEach(pin => pin.remove());
+
+      const pPercent = ((pScale - 0.5) / 5) * 100;
+      const uPercent = ((uScale - 0.5) / 5) * 100;
+
+      // Prospect Pin
+      const pPin = document.createElement("div");
+      pPin.className = "avatar-pin";
+      pPin.style.left = `${pPercent}%`;
+      pPin.innerHTML = `
+        <img src="${pImg}" alt="${pShortName}">
+        <span>${pShortName}</span>
+      `;
+      track.appendChild(pPin);
+
+      // Rep (You) Pin
+      const uPin = document.createElement("div");
+      uPin.className = "avatar-pin";
+      uPin.style.left = `${uPercent}%`;
+      uPin.innerHTML = `
+        <div class="rep-icon">You</div>
+        <span>You</span>
+      `;
+      track.appendChild(uPin);
+    }
+
+    function setOutreachTab(tab) {
+      currentOutreachTab = tab;
+      document.getElementById("tabCold").className = `tab-btn ${tab === 'cold' ? 'active' : ''}`;
+      document.getElementById("tabOpener").className = `tab-btn ${tab === 'opener' ? 'active' : ''}`;
+      updateOutreachCopy();
+    }
+
+    function updateOutreachCopy() {
+      const p = prospects[currentIdx];
+      if (currentOutreachTab === 'cold') {
+        document.getElementById("outSubject").innerText = p.coldSub;
+        document.getElementById("outBody").innerText = p.coldBody;
+      } else {
+        document.getElementById("outSubject").innerText = p.openSub;
+        document.getElementById("outBody").innerText = p.openBody;
+      }
+    }
+
+    function setMode(mode) {
+      const btnLegacy = document.getElementById("btn-legacy");
+      const btnAction = document.getElementById("btn-action");
+      const legacyBox = document.getElementById("legacyBox");
+      const actionContainer = document.getElementById("actionContainer");
+
+      if (mode === 'legacy') {
+        btnLegacy.className = "toggle-btn legacy-active";
+        btnAction.className = "toggle-btn";
+        legacyBox.style.display = "block";
+        actionContainer.style.display = "none";
+      } else {
+        btnLegacy.className = "toggle-btn";
+        btnAction.className = "toggle-btn active";
+        legacyBox.style.display = "none";
+        actionContainer.style.display = "flex";
+      }
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("outBody").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("✓ Copied to clipboard! Ready to send in 3 seconds.");
+      });
+    }
+
+    function logAccuracy() {
+      showToast("✓ Feedback recorded: Rep confirmed personality calibration!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerHTML = `<span style='color:#10b981; font-size:16px;'>✓</span> ${msg}`;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    // Modal Functions
+    function openSelfScanModal() {
+      document.getElementById("selfScanModal").style.display = "flex";
+    }
+
+    function closeSelfScanModal() {
+      document.getElementById("selfScanModal").style.display = "none";
+    }
+
+    function runSelfScan() {
+      const prog = document.getElementById("scanProgress");
+      prog.style.display = "block";
+      prog.innerText = "Analyzing syntax, tone & post cadence...";
+      setTimeout(() => {
+        prog.innerText = "✓ Analyzed 24 public posts. Generated: The Strategic Catalyst 🎯";
+      }, 700);
+    }
+
+    function applySelfCalibration() {
+      const s1 = parseFloat(document.getElementById("selfSlider1").value);
+      const s2 = parseFloat(document.getElementById("selfSlider2").value);
+      const s3 = parseFloat(document.getElementById("selfSlider3").value);
+      const s4 = parseFloat(document.getElementById("selfSlider4").value);
+
+      repProfile.scales = [s1, s2, s3, s4];
+      closeSelfScanModal();
+      updateUI();
+      showToast("Profile calibrated! 'You vs Jacob' comparison and battlecard updated.");
+    }
+
+    // Init
+    renderProspectList();
+    updateUI();
+  </script>
+</body>
+</html>

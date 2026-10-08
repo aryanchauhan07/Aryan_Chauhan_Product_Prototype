@@ -1,0 +1,9 @@
+{
+  "name": "aryan-chauhan-product-prototype",
+  "version": "1.0.0",
+  "description": "Zintlr Deal Copilot Product Prototype",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}
