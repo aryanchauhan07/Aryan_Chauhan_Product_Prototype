@@ -887,10 +887,14 @@
 
       <!-- If Legacy Mode Selected -->
       <div id="legacyBox" style="display:none; background:#fef2f2; border:1px solid #fecaca; border-radius:14px; padding:20px; color:#991b1b;">
-        <h4 style="font-size:15px; font-weight:800; margin-bottom:6px;">⚠️ The Actionability Void (Current Problem)</h4>
-        <p style="font-size:13px; line-height:1.5;">
-          The rep sees the card on the left with 4 sliders and traits like <em>"Deliberate"</em> and <em>"Risk-avoidant"</em>. But there is <strong>no prescriptive execution</strong>. The rep asks: <em>"So what do I actually say on the call?"</em> Rep cognitive fatigue sets in, leading to the 78% drop-off cliff.
+        <h4 style="font-size:15px; font-weight:800; margin-bottom:8px;">⚠️ The Legacy Problem: Isolated Target Traits</h4>
+        <p style="font-size:13px; line-height:1.6; color:#7f1d1d;">
+          In the legacy interface, Zintlr only plots the <strong>target prospect</strong> in isolation. Notice there is <strong>no "You"</strong> on the spectrum, no comparison, and no sales advice.
         </p>
+        <div style="margin-top:12px; padding:12px 14px; background:#ffffff; border:1px solid #fecaca; border-radius:8px; font-size:13px; color:#991b1b; line-height:1.5;">
+          ❌ <strong>The Actionability Void:</strong> The rep sees that Jacob is <em>"Deliberate"</em> and <em>"Risk-avoidant"</em>, but has no idea how to adjust their own pitch. Cognitive fatigue sets in, causing the <strong>78% drop-off cliff</strong>.<br><br>
+          👉 <em>Switch to <strong>"⚡ Action Engine (With Fixes)"</strong> above to see how we introduce "You vs Buyer", the 3-second battlecards, and 1-click tailored copy!</em>
+        </div>
       </div>
 
       <!-- Active Action Engine -->
@@ -1176,6 +1180,8 @@
       updateUI();
     }
 
+    let currentMode = "action"; // 'action' or 'legacy'
+
     function updateUI() {
       const p = prospects[currentIdx];
 
@@ -1183,13 +1189,28 @@
       document.getElementById("pImg").src = p.img;
       document.getElementById("pName").innerText = p.name;
       document.getElementById("pTitle").innerText = p.title;
-      document.getElementById("compareTitle").innerText = `You vs ${p.name.replace('🔒 ', '').split(' ')[0]}`;
+
+      const pFirstName = p.name.replace('🔒 ', '').split(' ')[0];
+      const compareTitleEl = document.getElementById("compareTitle");
+      const calibrateBtnEl = document.querySelector(".calibrate-link");
+      const topTrustBanner = document.querySelector(".trust-banner-top");
+
+      // In Legacy Mode: Show only target prospect spectrum without "You"
+      if (currentMode === 'legacy') {
+        compareTitleEl.innerText = `${pFirstName}'s Trait Spectrum (Target Only)`;
+        if (calibrateBtnEl) calibrateBtnEl.style.display = "none";
+        if (topTrustBanner) topTrustBanner.style.opacity = "0.35";
+      } else {
+        compareTitleEl.innerText = `⭐ You vs ${pFirstName}`;
+        if (calibrateBtnEl) calibrateBtnEl.style.display = "flex";
+        if (topTrustBanner) topTrustBanner.style.opacity = "1";
+      }
 
       // Render Pills
       const tagsEl = document.getElementById("pTags");
       tagsEl.innerHTML = p.pills.map(tag => `<div class="intel-tag ${tag.type}">${tag.text}</div>`).join("");
 
-      // Render Sliders with Rep Profile
+      // Render Sliders (pass currentMode so You pin is omitted in legacy)
       renderSlider("track1", p.scales[0], repProfile.scales[0], p.img, p.name.split(' ')[1]);
       renderSlider("track2", p.scales[1], repProfile.scales[1], p.img, p.name.split(' ')[1]);
       renderSlider("track3", p.scales[2], repProfile.scales[2], p.img, p.name.split(' ')[1]);
@@ -1218,7 +1239,7 @@
       const pPercent = ((pScale - 0.5) / 5) * 100;
       const uPercent = ((uScale - 0.5) / 5) * 100;
 
-      // Prospect Pin
+      // Prospect Pin (Always rendered for target)
       const pPin = document.createElement("div");
       pPin.className = "avatar-pin";
       pPin.style.left = `${pPercent}%`;
@@ -1228,15 +1249,17 @@
       `;
       track.appendChild(pPin);
 
-      // Rep (You) Pin
-      const uPin = document.createElement("div");
-      uPin.className = "avatar-pin";
-      uPin.style.left = `${uPercent}%`;
-      uPin.innerHTML = `
-        <div class="rep-icon">You</div>
-        <span>You</span>
-      `;
-      track.appendChild(uPin);
+      // Rep (You) Pin — ONLY rendered in Action Engine mode!
+      if (currentMode === 'action') {
+        const uPin = document.createElement("div");
+        uPin.className = "avatar-pin";
+        uPin.style.left = `${uPercent}%`;
+        uPin.innerHTML = `
+          <div class="rep-icon">You</div>
+          <span>You</span>
+        `;
+        track.appendChild(uPin);
+      }
     }
 
     function setOutreachTab(tab) {
@@ -1258,6 +1281,7 @@
     }
 
     function setMode(mode) {
+      currentMode = mode;
       const btnLegacy = document.getElementById("btn-legacy");
       const btnAction = document.getElementById("btn-action");
       const legacyBox = document.getElementById("legacyBox");
@@ -1274,6 +1298,8 @@
         legacyBox.style.display = "none";
         actionContainer.style.display = "flex";
       }
+
+      updateUI();
     }
 
     function copyToClipboard() {
